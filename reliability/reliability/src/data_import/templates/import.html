@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .upload-container {
+      position:relative
+      }
+
+    .upload-container input{
+      border:1px solid #92b0b3;
+      background:#f1f1f1;
+      outline:2px dashed #92b0b3;
+      outline-offset:-10px;
+      padding:2%;
+      text-align:center !important;
+      width:100%
+      }
+
+    .upload-container input:hover{
+      background:#ddd
+      }
+
+    .upload-container:before{
+      position:absolute;
+      bottom:50px;
+      left:245px;
+      content:"";
+      color:#3f8188;
+      font-weight:900;
+      }
+
+    .upload-btn{
+      margin-left:300px;
+      padding:7px 20px
+      }
+</style>
+
+<div class="row">
+    <div class="col-12">
+        <div class="upload-container" style="text-align:center;">
+            <input type="file" id="file_upload" onchange="uploadFile(this)"/>
+        </div>
+        <br>
+    </div>
+</div>
+
+
+<script>
+    <!--  Функция для загрузки файла перетаскиванием  -->
+    function uploadFile(input_obj){
+        var data = new FormData()
+        data.append('file',input_obj.files[0])
+
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/import/api/upload_file', {method: 'POST', body: data})
+        .then(response=>response.json())
+        .then(data=>{
+            input_obj.value= "";
+            })
+    }
+</script>
+
+{% endblock %}
