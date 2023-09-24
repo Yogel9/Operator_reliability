@@ -18,7 +18,6 @@ def index(request):
 
 def upload_file(request):
     """ API для загрузки файлов """
-    print(type(request.FILES['file']))
     path = file_save(request.FILES['file'])
     file_read(path)
     return JsonResponse({'status': 'okay'})
