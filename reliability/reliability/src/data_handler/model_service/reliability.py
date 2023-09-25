@@ -1,8 +1,23 @@
 from data_import.models import Activity
 from statistics import mean
 
+from django.db.models import QuerySet
 
-def get_table_Data():
+
+def add_Data(data) -> str:
+    """ Добавление деятельности"""
+    obj = Activity.objects.get_or_create(operation=data['operation'])
+    obj[0].N_count = data['N_count']
+    obj[0].n_error = data['n_error']
+    obj[0].k = data['k']
+    obj[0].Pk = data['Pk']
+    obj[0].Pob = data['Pob']
+    obj[0].Pi = data['Pi']
+    obj[0].save()
+    return f'Элемент ID:{obj[0].id} добавлен!'
+
+
+def get_table_Data() -> QuerySet:
     """ Получить все записи из таблицы модели Activity"""
     return Activity.objects.all()
 

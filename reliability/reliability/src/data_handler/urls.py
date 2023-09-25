@@ -6,4 +6,5 @@ urlpatterns = [
     path('', views.index, name='handler'),
     path('api/del', views.delete),
     path('api/upd', views.update),
+    path('api/add', views.add)
 ]
