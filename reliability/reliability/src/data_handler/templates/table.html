@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'index.html' %}
 {% load static %}
 
 
@@ -194,7 +194,7 @@
     function delete_Active(id){
         var params = new FormData();
         params.set('id', id);
-        fetch('http://'+window.location.hostname+':'+window.location.port+'/handler/api/del',
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/operator/api/del',
          { method: 'POST', body: params })
          .then(response=>response.json())
          .then(data=>{
@@ -208,7 +208,7 @@
         console.log(form);
         var params = new FormData(document.getElementById(form));
         params.set('id', id);
-        fetch('http://'+window.location.hostname+':'+window.location.port+'/handler/api/upd',
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/operator/api/upd',
          { method: 'POST', body: params })
          .then(response=>response.json())
          .then(data=>{
@@ -220,7 +220,7 @@
 
     function add_Active(){
         var params = new FormData(document.getElementById('form_add'));
-        fetch('http://'+window.location.hostname+':'+window.location.port+'/handler/api/add',
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/operator/api/add',
          { method: 'POST', body: params })
          .then(response=>response.json())
          .then(data=>{

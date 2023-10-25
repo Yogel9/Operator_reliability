@@ -3,7 +3,7 @@ import openpyxl
 
 from django.core.files.storage import FileSystemStorage
 
-from data_import.models import Activity
+from data_handler.models import Activity
 
 
 def file_save(file) -> str:

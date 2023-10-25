@@ -1,4 +1,4 @@
-from data_import.models import Activity
+from data_handler.models import Activity
 from statistics import mean
 
 from django.db.models import QuerySet

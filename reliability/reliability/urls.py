@@ -21,6 +21,5 @@ from .src.views import main_index
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', main_index, name="empty_page"),
-    path('import/', include('data_import.urls')),
-    path('handler/', include('data_handler.urls')),
+    path('operator/', include('data_handler.urls')),
 ]
