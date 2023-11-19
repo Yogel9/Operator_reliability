@@ -9,7 +9,7 @@ from data_handler.model_service.file_handler import file_read, file_save
 
 def info(request):
     """Краткая информация по программному модулю"""
-    context = {'pre_title': 'Import',
+    context = {'pre_title': 'Info',
                'title': 'Operator'}
     return render(request, 'index.html', {'context': context, })
 

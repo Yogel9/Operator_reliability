@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block body-content %}
+<div id="grey_background"
+     style="background-color: #F5F5F5;
+            border-radius: 30px;
+            margin: 1em;
+            min-height:: 50em;">
+
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link {% if context.pre_title == 'Info' %}active{% endif %}" data-toggle="tab" href="{% url 'devices' %}" role="tab" aria-controls="home" aria-selected="true">
+                Описание</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if context.pre_title == 'Scheme' %}active{% endif %}" data-toggle="tab" href="{% url 'scheme' %}" role="tab" aria-controls="profile" aria-selected="false">
+                Схема</a>
+        </li>
+    </ul>
+
+    <div style="margin: 1em;" >
+        {%  block content %}
+        <h1>ОЦЕНКА НАДЕЖНОСТИ ТЕХНИЧЕСКОГО ОБОРУДОВАНИЯ</h1>
+        <hr>
+        <p><b>Описание:</b> Это программный модуль оценки надежности и формирования плана замены технического оборудования.</p>
+        <p><b>Инструкция:</b> - </p>
+        <hr>
+        <p>Программный модуль состоит из нескольких частей.</p>
+        <p>Текст поясняющий принцип работы ...</p>
+        {% endblock %}
+    </div>
+
+</div>
+
+{% endblock %}

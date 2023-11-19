@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', main_index, name="empty_page"),
     path('operator/', include('data_handler.urls')),
+    path('devices/', include('devices.urls')),
 ]

@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Activity(models.Model):
     """ Деятельность оператора """
     operation = models.CharField('Название операции', max_length=100, unique=True)

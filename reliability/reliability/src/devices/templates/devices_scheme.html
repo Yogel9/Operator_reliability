@@ -1,0 +1,257 @@
+{% extends 'devices_index.html' %}
+{% load static %}
+
+
+{% block content %}
+<style>
+
+.dropzone {
+    background-color: #6DB65B;
+    text-align:center;
+<!--    flex-basis: 100%;-->
+    flex-grow: 1;
+    padding: 20px;
+    outline-color: red;
+    outline-style: dashed;
+    outline-width: 2px;
+}
+
+.schem_item{
+    background-color: #4AAE9B;
+    font-weight: normal;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    padding: 10px;
+}
+
+</style>
+
+<!--Конструктор схем-->
+<div class="row">
+    <!--  Здесь собираем схему  -->
+    <div class="col-8" >
+        <div class="row">
+            <h2 style="text-align:center;
+                        padding-bottom: 20px;">
+                Cхема: </h2>
+            <div id="DropzonePart_1"
+                 class="col dropzone"
+                 ondragover="onDragOver(event);"
+                 ondrop="onDrop(event);"
+                 data-part="1"> Часть схемы #1 </div>
+
+            <div id="DropzonePart_2"
+                 class="col dropzone"
+                 ondragover="onDragOver(event);"
+                 ondrop="onDrop(event);"
+                 data-part="2"> Часть схемы #2 </div>
+
+            <div id="DropzonePart_3"
+                 class="col dropzone"
+                 ondragover="onDragOver(event);"
+                 ondrop="onDrop(event);"
+                 data-part="3"> Часть схемы #3 </div>
+
+            <div id="DropzonePart_4"
+                 class="col dropzone"
+                 ondragover="onDragOver(event);"
+                 ondrop="onDrop(event);"
+                 data-part="4"> Часть схемы #4 </div>
+        </div>
+    </div>
+
+    <!--  Здесь элементы для сборки  -->
+    <div class="col-4 schem_list">
+        <h2 style="text-align:center;"> Элементы схемы: </h2>
+        <img id="draggable-1"
+             class="schem_item"
+             draggable="true"
+             ondragstart="onDragStart(event);"
+             src="{% static 'img/A.jpg' %}"
+             alt="Просто элемент"
+             style="width: auto;"
+             data-type="A"
+        >
+
+        <img id="draggable-2"
+             class="schem_item"
+             draggable="true"
+             ondragstart="onDragStart(event);"
+             src="{% static 'img/B.jpg' %}"
+             alt="Два элемента, соединенные параллельно"
+             style="width: auto;"
+             data-type="B"
+        >
+
+        <img id="draggable-3"
+             class="schem_item"
+             draggable="true"
+             ondragstart="onDragStart(event);"
+             src="{% static 'img/C.jpg' %}"
+             alt="Параллельно соединенные две группы элементов 1"
+             style="width: auto;"
+             data-type="C"
+        >
+
+        <img id="draggable-4"
+             class="schem_item"
+             draggable="true"
+             ondragstart="onDragStart(event);"
+             src="{% static 'img/D.jpg' %}"
+             alt="Параллельно соединенные две группы элементов 2"
+             style="width: auto;"
+             data-type="D"
+        >
+    </div>
+</div>
+<hr>
+
+<!--Параметры-->
+<div class="row">
+    <div class="col">
+        <h2 style="text-align:center;">Параметры плана:</h2>
+        <form id="plan">
+            <div class="form-group">
+                <label>Тип схемы</label>
+                <input class="form-control" id='schem-type' name="type" placeholder="Отладочная информация" readonly>
+            </div>
+            <div class="form-group">
+                <label>Период (в днях)</label>
+                <input class="form-control" name="period" placeholder="Введите период в днях">
+            </div>
+            <div class="form-group">
+                <label>Уровень крит. надёжности</label>
+                <input class="form-control" name="reliability" placeholder="Введите вероятность безотказной работы">
+            </div>
+            <br>
+            <button type="button" class="btn btn-primary" onclick="Do_plan()">Сформировать план</button>
+        </form>
+    </div>
+
+    <div class="col">
+        <div class="row">
+            <h2 style="text-align:center;">Управление параметрами схемы:</h2>
+            <div class="d-grid gap-2 col-6 mx-auto">
+                <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#addElementModal">
+                    Добавить элемент</button>
+                <button class="btn btn-primary" type="button">Загрузить схему</button>
+                <button class="btn btn-primary" type="button">Сохранить схему</button>
+                <button class="btn btn-danger" type="button" onclick="location.reload();">Сбросить схему</button>
+            </div>
+        </div>
+    </div>
+</div>
+<hr>
+
+<!--Таблица-->
+<div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Подсистема</th>
+                <th scope="col">Элемент</th>
+                <th scope="col">Название элемента</th>
+                <th scope="col">Наработка на отказ</th>
+                <th scope="col">Дата установки</th>
+                <th scope="col">Удалить</th>
+            </tr>
+        </thead>
+        <tbody id="table_body">
+            {% for element in context.elements_param %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ element.sub_system }}</td>
+                <td>{{ element.number }}</td>
+                <td>{{ element.element }}</td>
+                <td>{{ element.operating_time }}</td>
+                <td>{{ element.date }}</td>
+                <td>
+                    <button type="button" class="btn btn-outline-danger" style="height:25px; width:120px; display: flex; align-items: center; justify-content: center;" onclick="delete_Element({{element.id}})"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                        <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"></path>
+                    </svg>Удалить</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+<!-- Модальное окно -->
+<div class="modal fade" id="addElementModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Добавление элемента схемы</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+        <form action="" method="post">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Подсистема</label>
+                    <input class="form-control" placeholder="Введите целочисленное значение" name="sub_system">
+                    <small class="form-text text-muted">Номер подсистемы элемента.</small>
+                </div>
+                <br>
+                <div class="form-group">
+                    <label>Элемент</label>
+                    <input class="form-control" placeholder="Введите целочисленное значение" name="number">
+                    <small class="form-text text-muted">Номер элемента в подсистеме.</small>
+                </div>
+                <br>
+                <div class="form-group">
+                    <label>Название элемента</label>
+                    <input class="form-control" placeholder="Введите название элемента" name="element">
+                </div>
+                <br>
+                <div class="form-group">
+                    <label>Наработку на отказ</label>
+                    <input class="form-control" placeholder="Введите наработку на отказ" name="operating_time">
+                </div>
+                <br>
+                <div class="form-group">
+                    <label>Дата</label>
+                    <input class="form-control" placeholder="Введите дату установки" name="date">
+                </div>
+                <br>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+  </div>
+</div>
+
+
+
+<script src="{% static 'js/schem_droper.js' %}"></script>
+<script>
+    function delete_Element(id){
+        var params = new FormData();
+        params.set('id', id);
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/devices/api/del',
+         { method: 'POST', body: params })
+         .then(response=>response.json())
+         .then(data=>{
+            location.reload();
+            console.log('data=', data);
+            });
+    }
+
+    function Do_plan(){
+        my_form = document.getElementById('plan');
+        params = new FormData(my_form);
+
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/devices/api/get_plan',
+         { method: 'POST', body: params })
+         .then(response=>response.json())
+         .then(data=>{
+            console.log('status=', 'Генирируем план');
+            });
+
+    }
+</script>
+{% endblock %}
