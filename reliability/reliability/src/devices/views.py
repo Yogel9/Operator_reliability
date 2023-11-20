@@ -1,11 +1,17 @@
+import os
+
 import django
+from django.core.files.storage import FileSystemStorage
 from django.db.backends import sqlite3
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse
 from django.shortcuts import render
 
 from devices.models import Element
-
 from devices.model_service.reliability import count_schem
+
+from devices.model_service.file import SchemSaver
+
+from src.devices.model_service.file import SchemLoader
 
 
 def info(request):
@@ -54,9 +60,25 @@ def delete(request):
 
 def plan(request):
     """ API- Генерация плана по схеме"""
-    print(request.POST)
+    # print(request.POST)
+    open(os.getcwd() + '\\files\\plan.txt', "w")
     count_schem(schem_type=request.POST['type'],
                 period=int(request.POST['period']),
                 reliability=float(request.POST['reliability'])
                 )
-    return JsonResponse({"status": 'Делаем план!'})
+    return FileResponse(open(os.getcwd() + '\\files\\plan.txt', 'rb'))
+
+
+def save_schem(request):
+    """ Сохраняем файл со схемой """
+    file_dir = SchemSaver(request.POST.dict())
+    return FileResponse(open(file_dir, 'rb'))
+
+
+def load_schem(request):
+    """ Загружаем файл из схемы """
+    doc = request.FILES['file']
+    fs = FileSystemStorage()
+    file_name = fs.save(doc.name, doc)
+    params = SchemLoader(file_name)
+    return JsonResponse(params)

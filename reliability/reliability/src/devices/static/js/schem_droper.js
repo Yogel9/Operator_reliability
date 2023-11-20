@@ -57,13 +57,13 @@ function onDrop(event) {
   dropzone.appendChild(clone);
 
   // Отображаем тип схемы
-  console.log('schem_part=',  dropzone.dataset.part);
-  console.log('type=', draggableElement.dataset.type);
+//  console.log('schem_part=',  dropzone.dataset.part);
+//  console.log('type=', draggableElement.dataset.type);
   const schem = document.getElementById('schem-type').value.replaceAll(',', '');
   type = schem.split('');
-  console.log('all_type=', type);
+//  console.log('all_type=', type);
   type.splice(dropzone.dataset.part - 1, 1, draggableElement.dataset.type);
-  console.log('toStr=', type.toString().replaceAll(',', ''))
+//  console.log('toStr=', type.toString().replaceAll(',', ''))
   document.getElementById('schem-type').value = type.toString().replaceAll(',', '');
   // Сброс объект dataTransfer:
   event

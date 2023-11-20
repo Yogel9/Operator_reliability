@@ -1,20 +1,30 @@
 import datetime
+import os
+import matplotlib.pyplot as plt
 
 from devices.models import Element
 import math
 
 My_k = 1
+plan_dir = os.getcwd() + '\\files\\plan.txt'
 
 
 def count_schem(schem_type: str, period: int, reliability: float) -> float:
     """Расчёт схемы (вернем последнюю надежность)"""
+    result_list = list()
     for x in range(1, period):
         result = 1
+
         for i in range(1, len(schem_type)+1):
             result = result * part_counter(schem_type[i-1], i, x)
         if result < reliability:
             replacer(schem_type, x)  # если результат ниже ожидаемой надежности заменяем элемент
         print('Надёжность системы=', result)
+        result_list.append(result)
+    # График
+    plt.plot(range(1, period), result_list)
+    plt.savefig(os.getcwd() + '\\files\\graph.png')
+
     return result
 
 
@@ -32,18 +42,18 @@ def part_counter(schem_type: str, schem_part: int, x: int) -> float:
         case 'B':
             e1 = function(count_time(element_array[0].date, x), element_array[0].operating_time)
             e2 = function(count_time(element_array[1].date, x), element_array[1].operating_time)
-            return e1 if e1 > e2 else e2
+            return 1 if (e1 + e2) > 1 else e1 + e2
         case 'C':
             e1 = (function(count_time(element_array[1].date, x), element_array[1].operating_time) * 
                   function(count_time(element_array[2].date, x), element_array[2].operating_time))
             e2 = function(count_time(element_array[0].date, x), element_array[0].operating_time)
-            return e1 if e1 > e2 else e2
+            return 1 if (e1 + e2) > 1 else e1 + e2
         case 'D':
             e1 = (function(count_time(element_array[0].date, x), element_array[0].operating_time) *
                   function(count_time(element_array[1].date, x), element_array[1].operating_time))
             e2 = (function(count_time(element_array[2].date, x), element_array[2].operating_time) *
                   function(count_time(element_array[3].date, x), element_array[3].operating_time))
-            return e1 if e1 > e2 else e2
+            return 1 if (e1 + e2) > 1 else e1 + e2
         case _:
             return 0
     # except IndexError:
@@ -58,6 +68,7 @@ def function(x, operating_time) -> float:
     # print('Лямбда=', my_lambda)
     # print('Время в расчёте=', x)
     if x < 0:
+        print(x)
         print('Ошибка!')
         f = 1
     else:
@@ -102,14 +113,14 @@ def replace_element(part_number: int, schem_type: str, x: int):
             e1 = function(count_time(elements[0].date, x), elements[0].operating_time)
             e2 = function(count_time(elements[1].date, x), elements[1].operating_time)
             if e1 > e2:
-                change_date(elements[0], part_number, x)
-            else:
                 change_date(elements[1], part_number, x)
+            else:
+                change_date(elements[0], part_number, x)
         case 'C':
             e1 = (function(count_time(elements[1].date, x), elements[1].operating_time) *
                   function(count_time(elements[2].date, x), elements[2].operating_time))
             e2 = function(count_time(elements[0].date, x), elements[0].operating_time)
-            if e1 > e2:
+            if e2 > e1:
                 if (function(count_time(elements[1].date, x), elements[1].operating_time) > 
                         function(count_time(elements[2].date, x), elements[2].operating_time)):
                     change_date(elements[2], part_number, x)
@@ -123,7 +134,7 @@ def replace_element(part_number: int, schem_type: str, x: int):
                   function(count_time(elements[1].date, x), elements[1].operating_time))
             e2 = (function(count_time(elements[2].date, x), elements[2].operating_time) *
                   function(count_time(elements[3].date, x), elements[3].operating_time))
-            if e1 > e2:
+            if e2 > e1:
                 if (function(count_time(elements[0].date, x), elements[0].operating_time) >
                         function(count_time(elements[1].date, x), elements[1].operating_time)):
                     change_date(elements[1], part_number, x)
@@ -141,10 +152,17 @@ def replace_element(part_number: int, schem_type: str, x: int):
 
 def change_date(el, part_number, x):
     """Меняем дату устаовки в модели и записываем в файл"""
+
     print(f'Меняем {el.element} | Часть схемы: {part_number} | Элемент схемы: 1 | Время {x} д.')
     print(el.date)
     el.date = datetime.date.today() + datetime.timedelta(days=x)
     print(el.date)
+    with open(plan_dir, 'a') as f:
+        f.write(f'\nМеняем {el.element} |'
+                f' Часть схемы: {part_number} |'
+                f' Элемент схемы: 1 |'
+                f' Время {x} д. спустя начала работы |'
+                f' {el.date} - дата замены.')
     el.save()
 
 

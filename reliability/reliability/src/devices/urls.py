@@ -9,6 +9,6 @@ urlpatterns = [
     path('file', views.file),
     path('api/del', views.delete),
     path('api/get_plan', views.plan),
-    # path('api/add', views.add),
-    # path('api/upload_file', views.upload_file),
+    path('api/save_schem', views.save_schem),
+    path('api/load_schem', views.load_schem),
 ]

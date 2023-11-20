@@ -117,11 +117,11 @@
             </div>
             <div class="form-group">
                 <label>Период (в днях)</label>
-                <input class="form-control" name="period" placeholder="Введите период в днях">
+                <input class="form-control" id="period" name="period" placeholder="Введите период в днях">
             </div>
             <div class="form-group">
                 <label>Уровень крит. надёжности</label>
-                <input class="form-control" name="reliability" placeholder="Введите вероятность безотказной работы">
+                <input class="form-control" id="reliability" name="reliability" placeholder="Введите вероятность безотказной работы">
             </div>
             <br>
             <button type="button" class="btn btn-primary" onclick="Do_plan()">Сформировать план</button>
@@ -134,8 +134,9 @@
             <div class="d-grid gap-2 col-6 mx-auto">
                 <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#addElementModal">
                     Добавить элемент</button>
-                <button class="btn btn-primary" type="button">Загрузить схему</button>
-                <button class="btn btn-primary" type="button">Сохранить схему</button>
+                <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#UploadSchem">
+                    Загрузить схему</button>
+                <button class="btn btn-primary" type="button" onclick="Save_schem();">Сохранить схему</button>
                 <button class="btn btn-danger" type="button" onclick="location.reload();">Сбросить схему</button>
             </div>
         </div>
@@ -178,7 +179,7 @@
 </div>
 
 
-<!-- Модальное окно -->
+<!-- Модальное окно добавление элемента-->
 <div class="modal fade" id="addElementModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -226,9 +227,32 @@
 </div>
 
 
+<!-- Модальное окно загрузка файла-->
+<div class="modal fade" id="UploadSchem" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Загрузка схемы</h5>
+                <button type="button" class="btn-close" id="closeUploadSchem" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+        <div class="modal-body">
+            <div>
+                <label class="form-label">Выберите файл с схемой</label>
+                <input class="form-control form-control-lg" id='input_schem' name="file" type="file">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="Load_schem();">Подтвердить</button>
+        </div>
+    </div>
+  </div>
+</div>
+
+
 
 <script src="{% static 'js/schem_droper.js' %}"></script>
 <script>
+    <!--  Удаляем элемент из базы  -->
     function delete_Element(id){
         var params = new FormData();
         params.set('id', id);
@@ -241,17 +265,85 @@
             });
     }
 
+    <!-- Формируем план  -->
     function Do_plan(){
         my_form = document.getElementById('plan');
         params = new FormData(my_form);
 
         fetch('http://'+window.location.hostname+':'+window.location.port+'/devices/api/get_plan',
          { method: 'POST', body: params })
-         .then(response=>response.json())
+         .then(response=>response.blob())
          .then(data=>{
             console.log('status=', 'Генирируем план');
+            const anchorElement = document.createElement('a');
+            const url = window.URL.createObjectURL(data);
+            anchorElement.href = url;
+            anchorElement.download = String('plan.txt');
+            anchorElement.click();
             });
+    }
 
+    <!--  Сохраняем схему  -->
+    function Save_schem(){
+        my_form = document.getElementById('plan');
+        params = new FormData(my_form);
+
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/devices/api/save_schem',
+         { method: 'POST', body: params })
+         .then(response=>response.blob())
+         .then(data=>{
+                console.log('status=', 'Сохраняем схему');
+                const anchorElement = document.createElement('a');
+                const url = window.URL.createObjectURL(data);
+                anchorElement.href = url;
+                anchorElement.download = String('schem_saver.pickle');
+                anchorElement.click();
+             });
+    }
+
+    <!--  Загружаем схему  -->
+    function Load_schem(){
+        file_input = document.getElementById('input_schem');
+        params = new FormData();
+        params.append('file',file_input.files[0])
+
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/devices/api/load_schem',
+         { method: 'POST', body: params })
+         .then(response=>response.json())
+         .then(data=>{
+<!--            location.reload();-->
+            console.log('status=', 'Загружаем файл');
+            console.log('data=', data);
+            document.getElementById("schem-type").value = data.type;
+            document.getElementById("period").value = data.period;
+            document.getElementById("reliability").value = data.reliability;
+            document.getElementById("closeUploadSchem").click();
+            data.type.split('').forEach((element, index) => {
+                var draggableElement;
+                var index1 = index+1;
+                console.log("dropzone_id=", 'DropzonePart_'+index1);
+                const dropzone = document.getElementById('DropzonePart_'+index1);
+                switch (element) {
+                    case 'A':
+                        draggableElement = document.getElementById('draggable-1');
+                    case 'B':
+                        draggableElement2 = document.getElementById('draggable-2');
+                    case 'C':
+                        draggableElement3 = document.getElementById('draggable-3');
+                    case 'D':
+                        draggableElement4 = document.getElementById('draggable-4');
+                }
+                const old_id = dropzone.id+'element'
+                var old_element = document.getElementById(old_id);
+                if(old_element !== null){
+                  dropzone.removeChild(old_element);
+                  }
+                // Клонируем и вставляем объект
+                const clone = draggableElement.cloneNode(true);
+                clone.id = dropzone.id+'element';
+                dropzone.appendChild(clone);
+            });
+         });
     }
 </script>
 {% endblock %}
