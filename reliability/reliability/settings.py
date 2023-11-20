@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'data_handler',
     'devices',
+    'survival_analysis',
 ]
 
 MIDDLEWARE = [

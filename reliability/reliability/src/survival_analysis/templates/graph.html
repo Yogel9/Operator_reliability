@@ -1,0 +1,254 @@
+{% extends 'survival_index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-6">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th scope="col">Момент времени(t)</th>
+                <th scope="col">Число доживающих объектов(R)</th>
+                <th scope="col">Число объектов, для которых произошёл исход(d)</th>
+                <th scope="col">Вероятность исхода (отказа)</th>
+                <th scope="col">Удалить</th>
+            </tr>
+            </thead>
+            <tbody id="table_body">
+            {% for element in context.equipments %}
+            <tr>
+                <td>{{ element.time }}</td>
+                <td>{{ element.surviving_obj }}</td>
+                <td>{{ element.failed_obj }}</td>
+                <td>{{ element.probability }}</td>
+                <td>
+                    <button type="button" class="btn btn-outline-danger" style="height:25px; width:120px; display: flex; align-items: center; justify-content: center;" onclick="delete_Equipment({{element.id}})"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                        <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"></path>
+                    </svg>Удалить</button>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="col-6">
+        <div style="background-color: #e3e1e1; border-radius: 30px;">
+            <canvas id="myChart" style="width:100%;padding: 10px;" ></canvas>
+        </div>
+    </div>
+</div>
+<hr>
+<div class="row">
+    <div class="col-6">
+        <h2 style="text-align:center;">Значения выживаемости:</h2>
+        <form action="" method="post" id="paramForm">
+            <div class="form-group">
+                <label>Наработка</label>
+                <input class="form-control" id="operating_time" name='operating_time' placeholder="Введите показатель наработки" >
+            </div>
+            <br>
+            <button type="submit" class="btn btn-primary">Расчёт</button>
+        </form>
+    </div>
+    <div class="col-6">
+        <h2 style="text-align:center;">Кнопки управления:</h2>
+            <div class="d-grid gap-2 col-6 mx-auto">
+                <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#addModal">
+                    Добавить элемент</button>
+                <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#UploadSchem">
+                    Загрузить</button>
+                <button class="btn btn-primary" type="button" onclick="Save_schem();">Сохранить</button>
+            </div>
+    </div>
+</div>
+<hr>
+
+
+
+<!-- Модальное окно добавление элемента-->
+<div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Добавление элемента схемы</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+        <form action="" method="post" id="addFormModal">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Момент времени T</label>
+                    <input class="form-control" name="time">
+                </div>
+                <br>
+                <div class="form-group">
+                    <label>Число доживающих объектов R</label>
+                    <input class="form-control" id="surviving_obj" name="surviving_obj" onchange="calculate_probability()">
+                </div>
+                <br>
+                <div class="form-group">
+                    <label>Число отказывающих объектов d</label>
+                    <input class="form-control" id="failed_obj" name="failed_obj" onchange="calculate_probability();">
+                </div>
+                <br>
+                <div class="form-group">
+                    <label>Вероятность исхода(отказа)</label>
+                    <input class="form-control" id="probability" name="probability" readonly>
+                </div>
+                <br>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно загрузка файла-->
+<div class="modal fade" id="UploadSchem" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Загрузка</h5>
+                <button type="button" class="btn-close" id="closeUploadSchem" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+        <div class="modal-body">
+            <div>
+                <label class="form-label">Выберите файл</label>
+                <input class="form-control form-control-lg" id='input_data' name="file" type="file">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="Load_schem();">Подтвердить</button>
+        </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!--График и его данные !-->
+<script>
+const yValues = {{ context.graph_data.st | safe }};
+const xValues = {{ context.graph_data.t | safe }};
+const yMaxDs = {{ context.graph_data.dsMax | safe }};
+const yMinDs = {{ context.graph_data.dsMin| safe }};
+
+new Chart("myChart", {
+  type: "line",
+  data: {
+    labels: xValues,
+    datasets: [{
+      fill: false,
+      lineTension: 0,
+      steppedLine: 'before',
+      backgroundColor: "rgba(0,0,255,1.0)",
+      borderColor: "rgba(0,0,255,0.1)",
+      data: yValues
+    }, {
+      fill: false,
+      lineTension: 0,
+      steppedLine: 'before',
+      backgroundColor: 'red',
+      borderColor: 'red',
+      data: yMaxDs
+    },{
+      fill: false,
+      lineTension: 0,
+      steppedLine: 'before',
+      backgroundColor: 'green',
+      borderColor: 'green',
+      data: yMinDs
+    },]
+  },
+  options: {
+    legend: {display: false},
+    scales: {
+      yAxes: [{ticks: {min: 0, max:1}}],
+    },
+    pan: {
+        enabled: true,
+        mode: 'xy',
+      },
+    zoom: {
+        enabled: true,
+        mode: 'xy',
+    },
+  }
+});
+</script>
+
+<script>
+    <!--  Считаем вероятность  -->
+    function calculate_probability(){
+        const so = Number(document.getElementById("surviving_obj").value);
+        const fo = Number(document.getElementById("failed_obj").value);
+        console.log('so=', so);
+        console.log('fo=', fo);
+        document.getElementById("probability").value = fo/so;
+    }
+
+    <!--  Удаляем элемент из базы  -->
+    function delete_Equipment(id){
+        var params = new FormData();
+        params.set('id', id);
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/survival/api/del',
+         { method: 'POST', body: params })
+         .then(response=>response.json())
+         .then(data=>{
+            location.reload();
+            console.log('data=', data);
+            });
+    }
+
+    <!--  Сохраняем схему  -->
+    function Save_schem(){
+        my_form = document.getElementById('paramForm');
+        params = new FormData(my_form);
+
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/survival/api/save_schem',
+         { method: 'POST', body: params })
+         .then(response=>response.blob())
+         .then(data=>{
+                console.log('status=', 'Сохраняем параметры');
+                const anchorElement = document.createElement('a');
+                const url = window.URL.createObjectURL(data);
+                anchorElement.href = url;
+                anchorElement.download = String('survive_saver.pickle');
+                anchorElement.click();
+             });
+    }
+
+    <!--  Загружаем схему  -->
+    function Load_schem(){
+        file_input = document.getElementById('input_data');
+        params = new FormData();
+        params.append('file',file_input.files[0])
+
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/survival/api/load_schem',
+         { method: 'POST', body: params })
+         .then(response=>response.json())
+         .then(data=>{
+            location.reload();
+            console.log('data=', data);
+<!--            document.getElementById("operating_time").value = data.operating_time;-->
+<!--            document.getElementById("closeUploadSchem").click();-->
+         });
+    }
+</script>
+
+<!--Отображать параметры если они есть-->
+{% if context.param.Max != 0 %}
+    <script>
+        addEventListener("load", (event) => {
+            alert('Время='+{{context.param.T}}+
+            ';\nВыживаемость='+{{context.param.St}}+
+            ';\nНижний диапазон='+{{context.param.Min}}+
+            ';\nВерхний диапазон='+{{context.param.Max}}+';');
+        });
+
+    </script>
+{% endif %}
+
+{% endblock %}

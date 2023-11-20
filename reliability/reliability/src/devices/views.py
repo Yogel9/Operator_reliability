@@ -11,7 +11,7 @@ from devices.model_service.reliability import count_schem
 
 from devices.model_service.file import SchemSaver
 
-from src.devices.model_service.file import SchemLoader
+from devices.model_service.file import SchemLoader
 
 
 def info(request):

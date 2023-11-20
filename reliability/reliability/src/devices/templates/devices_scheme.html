@@ -323,16 +323,10 @@
                 var index1 = index+1;
                 console.log("dropzone_id=", 'DropzonePart_'+index1);
                 const dropzone = document.getElementById('DropzonePart_'+index1);
-                switch (element) {
-                    case 'A':
-                        draggableElement = document.getElementById('draggable-1');
-                    case 'B':
-                        draggableElement2 = document.getElementById('draggable-2');
-                    case 'C':
-                        draggableElement3 = document.getElementById('draggable-3');
-                    case 'D':
-                        draggableElement4 = document.getElementById('draggable-4');
-                }
+                if (element == 'A') {document.getElementById('draggable-1');}
+                if (element == 'B') {document.getElementById('draggable-2');}
+                if (element == 'C') {document.getElementById('draggable-3');}
+                if (element == 'D') {document.getElementById('draggable-4');}
                 const old_id = dropzone.id+'element'
                 var old_element = document.getElementById(old_id);
                 if(old_element !== null){
