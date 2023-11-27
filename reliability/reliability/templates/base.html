@@ -35,7 +35,7 @@
                 <a class="nav-link {% if context.title == 'Survival' %}active{% endif %}" aria-disabled="true" href="{% url 'survival' %}">3. Анализ выживаемости</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link disabled" aria-disabled="true">4. Надёжность ПО</a>
+              <a class="nav-link {% if context.title == 'Software' %}active{% endif %}" aria-disabled="true" href="{% url 'software' %}">4. Надёжность ПО</a>
             </li>
           </ul>
           <form class="d-flex" role="search">

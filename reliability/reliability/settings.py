@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'data_handler',
     'devices',
     'survival_analysis',
+    'software',
 ]
 
 MIDDLEWARE = [

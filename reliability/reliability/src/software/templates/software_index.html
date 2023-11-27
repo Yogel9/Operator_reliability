@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block body-content %}
+<div id="grey_background"
+     style="background-color: #F5F5F5;
+            border-radius: 30px;
+            margin: 1em;
+            min-height:: 50em;">
+
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link {% if context.pre_title == 'Info' %}active{% endif %}" data-toggle="tab" href="{% url 'software' %}" role="tab" aria-controls="home" aria-selected="true">
+                Описание</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if context.pre_title == 'Mills_model' %}active{% endif %}" data-toggle="tab" href="{% url 'mills' %}" role="tab" aria-controls="profile" aria-selected="false">
+                Модель Миллса</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if context.pre_title == 'Lipov_model' %}active{% endif %}" data-toggle="tab" href="{% url 'lipov' %}" role="tab" aria-controls="profile" aria-selected="false">
+                Модель Липова</a>
+        </li>
+    </ul>
+
+    <div style="margin: 1em;" >
+        {%  block content %}
+        <h1>РАСЧЕТ НАДЕЖНОСТИ ПО</h1>
+        <hr>
+        <p><b>Описание:</b> Это программный модуль оценки надежности ПО.</p>
+        <p><b>Инструкция:</b> - </p>
+        <hr>
+        <p>Программный модуль состоит из нескольких частей.</p>
+        <p>Текст поясняющий принцип работы ...</p>
+        {% endblock %}
+    </div>
+
+</div>
+
+{% endblock %}

@@ -24,4 +24,5 @@ urlpatterns = [
     path('operator/', include('data_handler.urls')),
     path('devices/', include('devices.urls')),
     path('survival/', include('survival_analysis.urls')),
+    path('software/', include('software.urls')),
 ]

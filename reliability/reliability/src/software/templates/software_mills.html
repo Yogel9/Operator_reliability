@@ -1,0 +1,141 @@
+{% extends 'software_index.html' %}
+{% load static %}
+
+
+{% block content %}
+
+<h1>Модель Миллса</h1>
+<label> Харлан Миллс предложил следущий способ оценки количества ошибок в программе.
+    Предположим, что в программе N естественных ошибок.
+    Внесем в нее дополнительно M искусственных ошибок.
+    Проведём тестирование программы.
+    Пусть в ходе тестирования было обнаружено n естественных ошибок и m искусственных.
+    Предположим, что вероятность обнаружения для естественных и искусственных ошибок одинакова.
+    Тогда выполняется соотношение: n/N =m/M.</label>
+<hr>
+<div class="row">
+    <div class='col' style="margin-bottom: 10px;">
+        <form id="MillsForm">
+            <h4>Входные параметры:</h4>
+            <div class="mb-3">
+                <label class="form-label">Обнаруженные естественные ошибки n</label>
+                <input class="form-control" name="n" id="n" onchange="calculate()">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Искусственные ошибки M</label>
+                <input class="form-control" name="M" id="HM" onchange="calculate()">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Обнаруженные искусственные ошибки m</label>
+                <input class="form-control" name="m" id="m" onchange="calculate()">
+            </div>
+        </form>
+        <hr>
+        <div>
+            <h4>Расчётные параметры:</h4>
+            <div class="mb-3">
+                <label class="form-label">Количество необнаруженных ошибок</label>
+                <input class="form-control" id="HN" readonly>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Мера доверия к модели C</label>
+                <input class="form-control" id="c" readonly>
+            </div>
+        </div>
+        <hr>
+    </div>
+    <div class='col' style="margin-bottom: 10px;">
+        <div class="row">
+            <div class="col">
+                <h4>Значения из БД:</h4>
+            </div>
+            <div class="col" style="display: flex; justify-content: flex-end; height:32px;">
+                <button type="button" class="btn btn-primary" onclick="add_Param()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"></path>
+                    </svg>
+                    Добавить
+                </button>
+            </div>
+        </div>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th scope="col">n</th>
+                <th scope="col">M</th>
+                <th scope="col">m</th>
+                <th scope="col">Выбрать</th>
+                <th scope="col">Удалить</th>
+            </tr>
+            </thead>
+            <tbody id="table_body">
+            {% for param in context.parameters %}
+            <tr>
+                <td>{{ param.low_n }}</td>
+                <td>{{ param.high_M }}</td>
+                <td>{{ param.low_m }}</td>
+                <td>
+                    <button type="button" class="btn btn-success" style="height:25px; width:120px; display: flex; align-items: center; justify-content: center;" onclick="choose_Param({{ param.low_n }},{{ param.high_M }},{{ param.low_m }})">
+                        Выбрать
+                    </button>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-outline-danger" style="height:25px; width:120px; display: flex; align-items: center; justify-content: center;" onclick="del_Param({{param.id}})"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                        <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"></path>
+                    </svg>Удалить</button>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<br>
+
+<script>
+    function add_Param(){
+        var params = new FormData(document.getElementById('MillsForm'));
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/software/mills/api/add',
+         { method: 'POST', body: params })
+         .then(response=>response.json())
+         .then(data=>{
+            location.reload();
+            console.log('data=', data);
+            });
+    }
+
+    function del_Param(id){
+        var params = new FormData();
+        params.append('id', id)
+        fetch('http://'+window.location.hostname+':'+window.location.port+'/software/mills/api/del',
+         { method: 'POST', body: params })
+         .then(response=>response.json())
+         .then(data=>{
+            location.reload();
+            console.log('data=', data);
+            });
+    }
+
+    function choose_Param(low_n, high_M, low_m){
+        document.getElementById('n').value= low_n;
+        document.getElementById('HM').value= high_M;
+        document.getElementById('m').value= low_m;
+        calculate();
+    }
+
+    function calculate(){
+        var HM = Number(document.getElementById('HM').value);
+        var n = Number(document.getElementById('n').value);
+        var m = Number(document.getElementById('m').value);
+        document.getElementById('HN').value = Math.round(HM*n/m - n);
+        if(document.getElementById('HN').value < document.getElementById('n').value){
+            document.getElementById('c').value = 1;
+        }else{
+            console.log(document.getElementById('HM').value+document.getElementById('HN').value+1);
+            document.getElementById('c').value = document.getElementById('HM').value/(HM+Number(document.getElementById('HN').value)+1) }
+
+    }
+
+</script>
+{% endblock %}
